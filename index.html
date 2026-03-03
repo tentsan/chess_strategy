@@ -136,7 +136,17 @@ h1 {
   color: #fff;
 }
 
-.battle-slot .slot-label {
+.battle-slot .slot-card {
+  font-size: 0.6rem;
+  color: #ccc;
+  max-width: 100%;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.battle-slot .slot-owner {
   font-size: 0.65rem;
   color: #aaa;
   margin-top: 2px;
@@ -336,10 +346,10 @@ function playCard(playerIndex) {
   const cSlot = document.getElementById('cpu-slot');
 
   pSlot.className = 'battle-slot active';
-  pSlot.innerHTML = `<span class="slot-label">${playerCard.icon} ${playerCard.name}</span><span class="rolled-value">${playerAtk}</span><span class="slot-label">あなた</span>`;
+  pSlot.innerHTML = `<span class="slot-card">${playerCard.icon} ${playerCard.name}</span><span class="rolled-value">${playerAtk}</span><span class="slot-owner">あなた</span>`;
 
   cSlot.className = 'battle-slot active';
-  cSlot.innerHTML = `<span class="slot-label">${cpuCard.icon} ${cpuCard.name}</span><span class="rolled-value">${cpuAtk}</span><span class="slot-label">CPU</span>`;
+  cSlot.innerHTML = `<span class="slot-card">${cpuCard.icon} ${cpuCard.name}</span><span class="rolled-value">${cpuAtk}</span><span class="slot-owner">CPU</span>`;
 
   // Determine result
   let resultMsg = '';
