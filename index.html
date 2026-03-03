@@ -320,6 +320,11 @@ function setMessage(text) {
   document.getElementById('message').textContent = text;
 }
 
+function renderBattleSlot(slot, card, atk, label) {
+  slot.className = 'battle-slot active';
+  slot.innerHTML = `<span class="slot-card">${card.icon} ${card.name}</span><span class="rolled-value">${atk}</span><span class="slot-owner">${label}</span>`;
+}
+
 function clearBattle() {
   document.getElementById('player-slot').innerHTML = 'YOU';
   document.getElementById('player-slot').className = 'battle-slot';
@@ -345,11 +350,8 @@ function playCard(playerIndex) {
   const pSlot = document.getElementById('player-slot');
   const cSlot = document.getElementById('cpu-slot');
 
-  pSlot.className = 'battle-slot active';
-  pSlot.innerHTML = `<span class="slot-card">${playerCard.icon} ${playerCard.name}</span><span class="rolled-value">${playerAtk}</span><span class="slot-owner">あなた</span>`;
-
-  cSlot.className = 'battle-slot active';
-  cSlot.innerHTML = `<span class="slot-card">${cpuCard.icon} ${cpuCard.name}</span><span class="rolled-value">${cpuAtk}</span><span class="slot-owner">CPU</span>`;
+  renderBattleSlot(pSlot, playerCard, playerAtk, 'あなた');
+  renderBattleSlot(cSlot, cpuCard, cpuAtk, 'CPU');
 
   // Determine result
   let resultMsg = '';
