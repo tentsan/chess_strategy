@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Card Battle</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  background: #1a1a2e;
+  color: #eee;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+}
+
+h1 {
+  font-size: 1.6rem;
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+  color: #e94560;
+}
+
+#game {
+  width: 420px;
+  max-width: 95vw;
+}
+
+/* --- Areas --- */
+.area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.area-label {
+  font-size: 0.85rem;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.cards {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  min-height: 100px;
+}
+
+/* --- Card --- */
+.card {
+  width: 64px;
+  height: 92px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: transform 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+
+.card-front {
+  background: linear-gradient(135deg, #16213e, #0f3460);
+  border: 2px solid #e94560;
+  cursor: pointer;
+}
+
+.card-front:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 6px 18px rgba(233, 69, 96, 0.4);
+}
+
+.card-back {
+  background: linear-gradient(135deg, #333, #555);
+  border: 2px solid #666;
+}
+
+.card .atk-range {
+  font-size: 0.7rem;
+  color: #ccc;
+  margin-top: 2px;
+}
+
+.card .atk-label {
+  font-size: 0.65rem;
+  color: #e94560;
+  margin-bottom: 2px;
+}
+
+.card .atk-value {
+  font-size: 1.4rem;
+  color: #fff;
+}
+
+/* --- Battle area --- */
+#battle-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin: 16px 0;
+  min-height: 120px;
+}
+
+.battle-slot {
+  width: 72px;
+  height: 100px;
+  border: 2px dashed #444;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+.battle-slot.active {
+  border-color: #e94560;
+}
+
+.battle-slot .rolled-value {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #fff;
+}
+
+.battle-slot .slot-label {
+  font-size: 0.65rem;
+  color: #aaa;
+  margin-top: 2px;
+}
+
+#vs {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #e94560;
+}
+
+/* --- Message --- */
+#message {
+  text-align: center;
+  font-size: 1rem;
+  min-height: 28px;
+  margin: 8px 0;
+  color: #f0c040;
+}
+
+/* --- Buttons --- */
+#restart-btn {
+  display: none;
+  margin: 12px auto;
+  padding: 10px 28px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  background: #e94560;
+  color: #fff;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#restart-btn:hover {
+  background: #c73652;
+}
+
+/* --- Animations --- */
+@keyframes pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  70% { transform: scale(1.1); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.pop {
+  animation: pop 0.35s ease-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+.shake {
+  animation: shake 0.4s ease-out;
+}
+
+.win-glow {
+  box-shadow: 0 0 16px rgba(80, 220, 100, 0.7);
+  border-color: #50dc64 !important;
+}
+
+.lose-glow {
+  box-shadow: 0 0 16px rgba(233, 69, 96, 0.7);
+  border-color: #e94560 !important;
+}
+</style>
+</head>
+<body>
+
+<h1>CARD BATTLE</h1>
+
+<div id="game">
+  <!-- CPU hand -->
+  <div class="area">
+    <div class="area-label">CPU (<span id="cpu-count">5</span>枚)</div>
+    <div class="cards" id="cpu-hand"></div>
+  </div>
+
+  <!-- Battle -->
+  <div id="battle-area">
+    <div class="battle-slot" id="cpu-slot">CPU</div>
+    <div id="vs">VS</div>
+    <div class="battle-slot" id="player-slot">YOU</div>
+  </div>
+
+  <div id="message" aria-live="polite" aria-atomic="true">カードを1枚選んでください</div>
+
+  <!-- Player hand -->
+  <div class="area">
+    <div class="area-label">あなた (<span id="player-count">5</span>枚)</div>
+    <div class="cards" id="player-hand"></div>
+  </div>
+
+  <button id="restart-btn" onclick="initGame()">もう一度遊ぶ</button>
+</div>
+
+<script>
+// --- Card definition ---
+const CARD_DEF = { minAtk: 3, maxAtk: 5 };
+
+// --- State ---
+let playerHand = [];
+let cpuHand = [];
+let busy = false;
+
+// --- Helpers ---
+function randInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function rollAtk(card) {
+  return randInt(card.minAtk, card.maxAtk);
+}
+
+function makeCard() {
+  return { ...CARD_DEF };
+}
+
+// --- Rendering ---
+function renderHands() {
+  const ph = document.getElementById('player-hand');
+  const ch = document.getElementById('cpu-hand');
+
+  ph.innerHTML = '';
+  ch.innerHTML = '';
+
+  playerHand.forEach((card, i) => {
+    const el = document.createElement('div');
+    el.className = 'card card-front pop';
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', `カード ${i + 1}: 攻撃力 ${card.minAtk} から ${card.maxAtk}`);
+    el.innerHTML = `
+      <span class="atk-label">ATK</span>
+      <span class="atk-value">${card.minAtk}-${card.maxAtk}</span>
+    `;
+    el.addEventListener('click', () => playCard(i));
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        playCard(i);
+      }
+    });
+    ph.appendChild(el);
+  });
+
+  cpuHand.forEach(() => {
+    const el = document.createElement('div');
+    el.className = 'card card-back';
+    el.innerHTML = `<span style="font-size:1.4rem;color:#999">?</span>`;
+    ch.appendChild(el);
+  });
+
+  document.getElementById('player-count').textContent = playerHand.length;
+  document.getElementById('cpu-count').textContent = cpuHand.length;
+}
+
+function setMessage(text) {
+  document.getElementById('message').textContent = text;
+}
+
+function clearBattle() {
+  document.getElementById('player-slot').innerHTML = 'YOU';
+  document.getElementById('player-slot').className = 'battle-slot';
+  document.getElementById('cpu-slot').innerHTML = 'CPU';
+  document.getElementById('cpu-slot').className = 'battle-slot';
+}
+
+// --- Game logic ---
+function playCard(playerIndex) {
+  if (busy) return;
+  busy = true;
+
+  // CPU picks random card
+  const cpuIndex = randInt(0, cpuHand.length - 1);
+
+  const playerCard = playerHand[playerIndex];
+  const cpuCard = cpuHand[cpuIndex];
+
+  const playerAtk = rollAtk(playerCard);
+  const cpuAtk = rollAtk(cpuCard);
+
+  // Show cards in battle area
+  const pSlot = document.getElementById('player-slot');
+  const cSlot = document.getElementById('cpu-slot');
+
+  pSlot.className = 'battle-slot active';
+  pSlot.innerHTML = `<span class="rolled-value">${playerAtk}</span><span class="slot-label">あなた</span>`;
+
+  cSlot.className = 'battle-slot active';
+  cSlot.innerHTML = `<span class="rolled-value">${cpuAtk}</span><span class="slot-label">CPU</span>`;
+
+  // Determine result
+  let resultMsg = '';
+  if (playerAtk > cpuAtk) {
+    resultMsg = `${playerAtk} vs ${cpuAtk} — あなたの勝ち！ CPUのカードを破壊！`;
+    cpuHand.splice(cpuIndex, 1);
+    pSlot.classList.add('win-glow');
+    cSlot.classList.add('lose-glow');
+    cSlot.classList.add('shake');
+  } else if (cpuAtk > playerAtk) {
+    resultMsg = `${playerAtk} vs ${cpuAtk} — CPUの勝ち… あなたのカードを失った！`;
+    playerHand.splice(playerIndex, 1);
+    cSlot.classList.add('win-glow');
+    pSlot.classList.add('lose-glow');
+    pSlot.classList.add('shake');
+  } else {
+    resultMsg = `${playerAtk} vs ${cpuAtk} — 引き分け！`;
+  }
+
+  setMessage(resultMsg);
+  renderHands();
+
+  // Check game over
+  setTimeout(() => {
+    if (playerHand.length === 0) {
+      setMessage('ゲームオーバー… あなたのカードがなくなりました');
+      document.getElementById('restart-btn').style.display = 'block';
+      busy = false;
+      return;
+    }
+    if (cpuHand.length === 0) {
+      setMessage('あなたの勝利！ CPUのカードをすべて破壊しました！');
+      document.getElementById('restart-btn').style.display = 'block';
+      busy = false;
+      return;
+    }
+
+    setTimeout(() => {
+      clearBattle();
+      setMessage('カードを1枚選んでください');
+      busy = false;
+    }, 800);
+  }, 1200);
+}
+
+// --- Init ---
+function initGame() {
+  playerHand = Array.from({ length: 5 }, makeCard);
+  cpuHand = Array.from({ length: 5 }, makeCard);
+  busy = false;
+
+  document.getElementById('restart-btn').style.display = 'none';
+  clearBattle();
+  setMessage('カードを1枚選んでください');
+  renderHands();
+}
+
+initGame();
+</script>
+
+</body>
+</html>
