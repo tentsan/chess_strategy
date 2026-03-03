@@ -279,11 +279,20 @@ function renderHands() {
   playerHand.forEach((card, i) => {
     const el = document.createElement('div');
     el.className = 'card card-front pop';
+    el.setAttribute('role', 'button');
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-label', `カード ${i + 1}: 攻撃力 ${card.minAtk} から ${card.maxAtk}`);
     el.innerHTML = `
       <span class="atk-label">ATK</span>
       <span class="atk-value">${card.minAtk}-${card.maxAtk}</span>
     `;
     el.addEventListener('click', () => playCard(i));
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        playCard(i);
+      }
+    });
     ph.appendChild(el);
   });
 
