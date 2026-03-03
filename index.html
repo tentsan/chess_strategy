@@ -81,6 +81,15 @@ h1 {
   box-shadow: 0 6px 18px rgba(233, 69, 96, 0.4);
 }
 
+.card-front.cpu-card {
+  cursor: default;
+}
+
+.card-front.cpu-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
 .card-back {
   background: linear-gradient(135deg, #333, #555);
   border: 2px solid #666;
@@ -305,10 +314,15 @@ function renderHands() {
     ph.appendChild(el);
   });
 
-  cpuHand.forEach(() => {
+  cpuHand.forEach((card, i) => {
     const el = document.createElement('div');
-    el.className = 'card card-back';
-    el.innerHTML = `<span style="font-size:1.4rem;color:#999">?</span>`;
+    el.className = 'card card-front cpu-card';
+    el.setAttribute('aria-label', `CPUカード ${i + 1} (${card.name}): 攻撃力 ${card.minAtk} から ${card.maxAtk}`);
+    el.innerHTML = `
+      <span class="card-icon">${card.icon}</span>
+      <span class="card-name">${card.name}</span>
+      <span class="atk-range">${card.minAtk}-${card.maxAtk}</span>
+    `;
     ch.appendChild(el);
   });
 
