@@ -157,14 +157,6 @@ h1 {
   color: #f0c040;
 }
 
-/* --- Score --- */
-#score {
-  text-align: center;
-  font-size: 0.85rem;
-  color: #aaa;
-  margin-bottom: 4px;
-}
-
 /* --- Buttons --- */
 #restart-btn {
   display: none;
@@ -220,8 +212,6 @@ h1 {
 <h1>CARD BATTLE</h1>
 
 <div id="game">
-  <div id="score"></div>
-
   <!-- CPU hand -->
   <div class="area">
     <div class="area-label">CPU (<span id="cpu-count">5</span>枚)</div>
@@ -235,7 +225,7 @@ h1 {
     <div class="battle-slot" id="player-slot">YOU</div>
   </div>
 
-  <div id="message">カードを1枚選んでください</div>
+  <div id="message" aria-live="polite" aria-atomic="true">カードを1枚選んでください</div>
 
   <!-- Player hand -->
   <div class="area">
