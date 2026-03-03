@@ -86,21 +86,21 @@ h1 {
   border: 2px solid #666;
 }
 
-.card .atk-range {
-  font-size: 0.7rem;
-  color: #ccc;
+.card .card-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.card .card-name {
+  font-size: 0.55rem;
+  color: #e94560;
   margin-top: 2px;
 }
 
-.card .atk-label {
+.card .atk-range {
   font-size: 0.65rem;
-  color: #e94560;
-  margin-bottom: 2px;
-}
-
-.card .atk-value {
-  font-size: 1.4rem;
-  color: #fff;
+  color: #ccc;
+  margin-top: 4px;
 }
 
 /* --- Battle area --- */
@@ -136,7 +136,17 @@ h1 {
   color: #fff;
 }
 
-.battle-slot .slot-label {
+.battle-slot .slot-card {
+  font-size: 0.6rem;
+  color: #ccc;
+  max-width: 100%;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.battle-slot .slot-owner {
   font-size: 0.65rem;
   color: #aaa;
   margin-top: 2px;
@@ -237,8 +247,15 @@ h1 {
 </div>
 
 <script>
-// --- Card definition ---
-const CARD_DEF = { minAtk: 3, maxAtk: 5 };
+// --- Card types ---
+const CARD_TYPES = [
+  { name: 'ポーン',     icon: '♟', minAtk: 3, maxAtk: 6 },
+  { name: 'ナイト',     icon: '♞', minAtk: 4, maxAtk: 6 },
+  { name: 'ルーク',     icon: '♜', minAtk: 3, maxAtk: 8 },
+  { name: 'ビショップ', icon: '♝', minAtk: 5, maxAtk: 7 },
+  { name: 'クイーン',   icon: '♛', minAtk: 5, maxAtk: 8 },
+  { name: 'キング',     icon: '♚', minAtk: 2, maxAtk: 10 },
+];
 
 // --- State ---
 let playerHand = [];
@@ -255,7 +272,8 @@ function rollAtk(card) {
 }
 
 function makeCard() {
-  return { ...CARD_DEF };
+  const type = CARD_TYPES[randInt(0, CARD_TYPES.length - 1)];
+  return { ...type };
 }
 
 // --- Rendering ---
@@ -271,10 +289,11 @@ function renderHands() {
     el.className = 'card card-front pop';
     el.setAttribute('role', 'button');
     el.setAttribute('tabindex', '0');
-    el.setAttribute('aria-label', `カード ${i + 1}: 攻撃力 ${card.minAtk} から ${card.maxAtk}`);
+    el.setAttribute('aria-label', `カード ${i + 1} (${card.name}): 攻撃力 ${card.minAtk} から ${card.maxAtk}`);
     el.innerHTML = `
-      <span class="atk-label">ATK</span>
-      <span class="atk-value">${card.minAtk}-${card.maxAtk}</span>
+      <span class="card-icon">${card.icon}</span>
+      <span class="card-name">${card.name}</span>
+      <span class="atk-range">${card.minAtk}-${card.maxAtk}</span>
     `;
     el.addEventListener('click', () => playCard(i));
     el.addEventListener('keydown', (e) => {
@@ -299,6 +318,11 @@ function renderHands() {
 
 function setMessage(text) {
   document.getElementById('message').textContent = text;
+}
+
+function renderBattleSlot(slot, card, atk, label) {
+  slot.className = 'battle-slot active';
+  slot.innerHTML = `<span class="slot-card">${card.icon} ${card.name}</span><span class="rolled-value">${atk}</span><span class="slot-owner">${label}</span>`;
 }
 
 function clearBattle() {
@@ -326,11 +350,8 @@ function playCard(playerIndex) {
   const pSlot = document.getElementById('player-slot');
   const cSlot = document.getElementById('cpu-slot');
 
-  pSlot.className = 'battle-slot active';
-  pSlot.innerHTML = `<span class="rolled-value">${playerAtk}</span><span class="slot-label">あなた</span>`;
-
-  cSlot.className = 'battle-slot active';
-  cSlot.innerHTML = `<span class="rolled-value">${cpuAtk}</span><span class="slot-label">CPU</span>`;
+  renderBattleSlot(pSlot, playerCard, playerAtk, 'あなた');
+  renderBattleSlot(cSlot, cpuCard, cpuAtk, 'CPU');
 
   // Determine result
   let resultMsg = '';
