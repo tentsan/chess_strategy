@@ -305,10 +305,14 @@ function renderHands() {
     ph.appendChild(el);
   });
 
-  cpuHand.forEach(() => {
+  cpuHand.forEach((card) => {
     const el = document.createElement('div');
-    el.className = 'card card-back';
-    el.innerHTML = `<span style="font-size:1.4rem;color:#999">?</span>`;
+    el.className = 'card card-front';
+    el.innerHTML = `
+      <span class="card-icon">${card.icon}</span>
+      <span class="card-name">${card.name}</span>
+      <span class="atk-range">${card.minAtk}-${card.maxAtk}</span>
+    `;
     ch.appendChild(el);
   });
 
