@@ -305,9 +305,10 @@ function renderHands() {
     ph.appendChild(el);
   });
 
-  cpuHand.forEach((card) => {
+  cpuHand.forEach((card, i) => {
     const el = document.createElement('div');
     el.className = 'card card-front';
+    el.setAttribute('aria-label', `CPUカード ${i + 1} (${card.name}): 攻撃力 ${card.minAtk} から ${card.maxAtk}`);
     el.innerHTML = `
       <span class="card-icon">${card.icon}</span>
       <span class="card-name">${card.name}</span>
