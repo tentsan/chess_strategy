@@ -279,7 +279,7 @@ function renderHands() {
     el.className = 'card card-front pop';
     el.setAttribute('role', 'button');
     el.setAttribute('tabindex', '0');
-    el.setAttribute('aria-label', `${card.name}: 攻撃力 ${card.minAtk} から ${card.maxAtk}`);
+    el.setAttribute('aria-label', `カード ${i + 1} (${card.name}): 攻撃力 ${card.minAtk} から ${card.maxAtk}`);
     el.innerHTML = `
       <span class="card-icon">${card.icon}</span>
       <span class="card-name">${card.name}</span>
