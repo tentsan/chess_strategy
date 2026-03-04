@@ -320,6 +320,7 @@ let cpuHand = [];
 let phase = 'arrange'; // 'arrange' | 'battle'
 let dragSrcIndex = null;
 let dragOverIndex = null;
+let focusedIndex = -1;
 
 // --- Helpers ---
 function randInt(min, max) {
@@ -356,15 +357,19 @@ function renderHands(activePlayerIdx, activeCpuIdx) {
     if (phase === 'arrange') {
       el.className = 'card card-front draggable pop';
       el.setAttribute('draggable', 'true');
+      el.setAttribute('role', 'button');
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('aria-roledescription', '並び替え可能なカード');
       el.addEventListener('dragstart', (e) => onDragStart(e, i));
       el.addEventListener('dragover', (e) => onDragOver(e));
       el.addEventListener('dragenter', (e) => onDragEnter(e, i));
       el.addEventListener('drop', (e) => onDrop(e));
       el.addEventListener('dragend', () => onDragEnd());
+      el.addEventListener('keydown', (e) => onCardKeydown(e, i));
     } else {
       el.className = 'card card-front cpu-card' + (isActive ? ' auto-active' : '');
     }
-    el.setAttribute('aria-label', `カード ${i + 1} (${card.name}): 攻撃力 ${card.minAtk} から ${card.maxAtk}`);
+    el.setAttribute('aria-label', `カード ${i + 1} / ${playerHand.length} (${card.name}): 攻撃力 ${card.minAtk} から ${card.maxAtk}`);
     el.innerHTML = `
       <span class="card-icon">${card.icon}</span>
       <span class="card-name">${card.name}</span>
@@ -388,6 +393,11 @@ function renderHands(activePlayerIdx, activeCpuIdx) {
 
   document.getElementById('player-count').textContent = playerHand.length;
   document.getElementById('cpu-count').textContent = cpuHand.length;
+
+  // Restore focus after re-render
+  if (phase === 'arrange' && focusedIndex >= 0 && focusedIndex < playerHand.length) {
+    ph.children[focusedIndex].focus();
+  }
 }
 
 function setMessage(text) {
@@ -404,6 +414,24 @@ function clearBattle() {
   document.getElementById('player-slot').className = 'battle-slot';
   document.getElementById('cpu-slot').innerHTML = 'CPU';
   document.getElementById('cpu-slot').className = 'battle-slot';
+}
+
+// --- Keyboard reorder ---
+function onCardKeydown(e, index) {
+  if (phase !== 'arrange') return;
+  if (e.key === 'ArrowLeft' && index > 0) {
+    e.preventDefault();
+    [playerHand[index], playerHand[index - 1]] = [playerHand[index - 1], playerHand[index]];
+    focusedIndex = index - 1;
+    renderHands();
+    setMessage(`カード ${focusedIndex + 1} に移動しました（←→で並び替え）`);
+  } else if (e.key === 'ArrowRight' && index < playerHand.length - 1) {
+    e.preventDefault();
+    [playerHand[index], playerHand[index + 1]] = [playerHand[index + 1], playerHand[index]];
+    focusedIndex = index + 1;
+    renderHands();
+    setMessage(`カード ${focusedIndex + 1} に移動しました（←→で並び替え）`);
+  }
 }
 
 // --- Drag and drop ---
@@ -554,11 +582,12 @@ function initGame() {
   cpuHand = Array.from({ length: 5 }, makeCard);
   phase = 'arrange';
   dragSrcIndex = null;
+  focusedIndex = -1;
 
   document.getElementById('restart-btn').style.display = 'none';
   document.getElementById('start-btn').style.display = 'block';
   clearBattle();
-  setMessage('カードをドラッグして並び替えてください');
+  setMessage('カードをドラッグ、または←→キーで並び替えてください');
   renderHands();
 }
 
