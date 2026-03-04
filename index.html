@@ -419,18 +419,22 @@ function clearBattle() {
 // --- Keyboard reorder ---
 function onCardKeydown(e, index) {
   if (phase !== 'arrange') return;
-  if (e.key === 'ArrowLeft' && index > 0) {
+  if (e.key === 'ArrowLeft') {
     e.preventDefault();
-    [playerHand[index], playerHand[index - 1]] = [playerHand[index - 1], playerHand[index]];
-    focusedIndex = index - 1;
-    renderHands();
-    setMessage(`カード ${focusedIndex + 1} に移動しました（←→で並び替え）`);
-  } else if (e.key === 'ArrowRight' && index < playerHand.length - 1) {
+    if (index > 0) {
+      [playerHand[index], playerHand[index - 1]] = [playerHand[index - 1], playerHand[index]];
+      focusedIndex = index - 1;
+      renderHands();
+      setMessage(`カード ${focusedIndex + 1} に移動しました（←→で並び替え）`);
+    }
+  } else if (e.key === 'ArrowRight') {
     e.preventDefault();
-    [playerHand[index], playerHand[index + 1]] = [playerHand[index + 1], playerHand[index]];
-    focusedIndex = index + 1;
-    renderHands();
-    setMessage(`カード ${focusedIndex + 1} に移動しました（←→で並び替え）`);
+    if (index < playerHand.length - 1) {
+      [playerHand[index], playerHand[index + 1]] = [playerHand[index + 1], playerHand[index]];
+      focusedIndex = index + 1;
+      renderHands();
+      setMessage(`カード ${focusedIndex + 1} に移動しました（←→で並び替え）`);
+    }
   }
 }
 
