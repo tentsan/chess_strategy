@@ -461,7 +461,10 @@ function onDragEnter(e, targetIndex) {
 
 function updateDragVisuals() {
   const cards = [...document.getElementById('player-hand').children];
-  const cardWidth = 72; // 64px card + 8px gap
+  let cardWidth = 72;
+  if (cards.length >= 2) {
+    cardWidth = cards[1].getBoundingClientRect().left - cards[0].getBoundingClientRect().left;
+  }
 
   cards.forEach((card, i) => {
     let shift = 0;
@@ -487,14 +490,17 @@ function updateDragVisuals() {
 
 function onDrop(e) {
   e.preventDefault();
-  // Reorder applied in onDragEnd
-}
-
-function onDragEnd() {
   if (dragSrcIndex !== null && dragOverIndex !== null && dragSrcIndex !== dragOverIndex) {
     const moved = playerHand.splice(dragSrcIndex, 1)[0];
     playerHand.splice(dragOverIndex, 0, moved);
   }
+  dragSrcIndex = null;
+  dragOverIndex = null;
+  renderHands();
+}
+
+function onDragEnd() {
+  // Clean up if drop didn't handle it (e.g. drag canceled)
   dragSrcIndex = null;
   dragOverIndex = null;
   renderHands();
