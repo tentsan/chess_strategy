@@ -440,6 +440,7 @@ function onDragStart(e, index) {
   dragSrcIndex = index;
   dragOverIndex = index;
   e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', String(index));
   setTimeout(() => {
     const cards = document.getElementById('player-hand').children;
     if (cards[index]) cards[index].classList.add('dragging');
