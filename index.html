@@ -81,11 +81,11 @@ h1 {
   box-shadow: 0 6px 18px rgba(233, 69, 96, 0.4);
 }
 
-.card-front.cpu-card {
+.card-front.non-interactive {
   cursor: default;
 }
 
-.card-front.cpu-card:hover {
+.card-front.non-interactive:hover {
   transform: none;
   box-shadow: none;
 }
@@ -109,7 +109,7 @@ h1 {
   transform: translateY(-6px);
 }
 
-.card-front.cpu-card.auto-active {
+.card-front.non-interactive.auto-active {
   transform: translateY(-6px);
 }
 
@@ -367,7 +367,7 @@ function renderHands(activePlayerIdx, activeCpuIdx) {
       el.addEventListener('dragend', () => onDragEnd());
       el.addEventListener('keydown', (e) => onCardKeydown(e, i));
     } else {
-      el.className = 'card card-front cpu-card' + (isActive ? ' auto-active' : '');
+      el.className = 'card card-front non-interactive' + (isActive ? ' auto-active' : '');
     }
     el.setAttribute('aria-label', `カード ${i + 1} / ${playerHand.length} (${card.name}): 攻撃力 ${card.minAtk} から ${card.maxAtk}`);
     el.innerHTML = `
@@ -381,7 +381,7 @@ function renderHands(activePlayerIdx, activeCpuIdx) {
   cpuHand.forEach((card, i) => {
     const el = document.createElement('div');
     const isActive = activeCpuIdx === i;
-    el.className = 'card card-front cpu-card' + (isActive ? ' auto-active' : '');
+    el.className = 'card card-front cpu-card non-interactive' + (isActive ? ' auto-active' : '');
     el.setAttribute('aria-label', `CPUカード ${i + 1} (${card.name}): 攻撃力 ${card.minAtk} から ${card.maxAtk}`);
     el.innerHTML = `
       <span class="card-icon">${card.icon}</span>
